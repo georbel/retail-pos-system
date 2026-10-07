@@ -1,0 +1,23 @@
+{% extends "pos/base.html" %}
+{% block title %}Cashiering{% endblock %}
+{% block page_heading %}Point of sale{% endblock %}
+{% block content %}
+<div class="page-intro"><p class="muted">{{ branch.name }} · {{ summary.business_date|date:"l, F j, Y" }} · {{ user.display_name }}</p><a class="button secondary" href="{% url 'cashier_zreading' %}">View today's Z Reading →</a></div>
+{% if closed %}<div class="alert warning">This shift was closed with {{ closed.number }}. New sales are disabled for today.</div>{% endif %}
+<div class="pos-layout">
+ <section class="panel product-picker"><div class="panel-heading"><div><h2>Products</h2><p>Search by name, product code, or scan barcode.</p></div></div>
+   <form method="get" class="search-bar"><input class="input" name="q" value="{{ query }}" placeholder="Search or scan barcode..." autofocus><button class="button secondary">Search</button></form>
+   <div class="product-grid">{% for product in products %}<button type="button" class="product-card add-to-cart" data-id="{{ product.id }}" data-name="{{ product.name }}" data-code="{{ product.code }}" data-price="{{ product.selling_price }}" data-stock="{% for inv in product.inventories.all %}{% if inv.branch_id == branch.id %}{{ inv.quantity }}{% endif %}{% endfor %}" {% if closed %}disabled{% endif %}><span class="product-code">{{ product.code }}</span><strong>{{ product.name }}</strong><span class="product-price">₱{{ product.selling_price|floatformat:2 }}</span><small>In stock</small></button>{% empty %}<p class="empty-state">No available products found. Receive a delivery or check your search.</p>{% endfor %}</div>
+ </section>
+ <section class="panel cart-panel"><div class="panel-heading"><div><h2>Current sale</h2><p>Review items and payment before completion.</p></div><button type="button" class="link-danger" id="clear-cart">Clear cart</button></div>
+  <div class="cart-table table-wrap"><table><thead><tr><th>Item</th><th>Qty</th><th class="numeric">Price</th><th class="numeric">Total</th><th></th></tr></thead><tbody id="cart-lines"><tr><td colspan="5" class="empty-state">Select products to start a sale.</td></tr></tbody></table></div>
+  <form method="post" action="{% url 'complete_sale' %}" id="checkout-form">{% csrf_token %}<input type="hidden" name="cart" id="cart-json"><div class="form-grid checkout-fields"><div class="field"><label>Customer (optional)</label><input class="input" name="customer_name" maxlength="120"></div><div class="field"><label>Payment method *</label><select class="input" name="payment_method" id="payment-method" required>{% for method in payment_methods %}<option value="{{ method.id }}" data-kind="{{ method.kind }}">{{ method.name }}</option>{% endfor %}</select></div></div>
+   <div class="field"><label>Discount (₱)</label><input class="input" type="number" name="discount" id="discount" min="0" step=".01" value="0"></div>
+   <div class="totals"><div><span>Subtotal</span><strong id="subtotal">₱0.00</strong></div><div><span>Discount</span><strong id="discount-view">₱0.00</strong></div><div class="total-line"><span>Total due</span><strong id="total">₱0.00</strong></div></div>
+   <div class="field"><label>Amount tendered (₱)</label><input class="input" type="number" name="amount_tendered" id="tendered" min="0" step=".01" value="0"></div><div class="change-row"><span>Change</span><strong id="change">₱0.00</strong></div>
+   <button type="submit" class="button primary wide checkout-button" {% if closed %}disabled{% endif %} data-confirm-message="The payment will be recorded and inventory will be updated. Check the cart and tender before continuing." data-confirm-title="Complete this sale?" data-confirm-action="Complete sale">Complete sale</button>
+  </form>
+ </section>
+</div>
+<section class="sales-strip"><div><span>TODAY'S SALES</span><strong>₱{{ summary.net_sales|floatformat:2 }}</strong></div><div><span>TRANSACTIONS</span><strong>{{ summary.transactions }}</strong></div><div><span>ITEMS SOLD</span><strong>{{ summary.items_sold|floatformat:0 }}</strong></div><div><span>DISCOUNTS</span><strong>₱{{ summary.discounts|floatformat:2 }}</strong></div><a class="text-link" href="{% url 'cashier_zreading' %}">Today's summary →</a></section>
+{% endblock %}

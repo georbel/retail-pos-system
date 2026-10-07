@@ -1,0 +1,68 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}POS System{% endblock %} · POS</title>
+  <link rel="stylesheet" href="{% static 'pos/app.css' %}">
+  <link rel="stylesheet" href="{% static 'pos/confirm.css' %}">
+</head>
+<body class="{% if user.is_authenticated and user.role == 'CASHIER' %}cashier-shell{% endif %}">
+{% if user.is_authenticated %}
+<div class="layout">
+  <aside class="sidebar">
+    <a class="brand" href="{% url 'dashboard' %}"><span class="brand-icon">P</span><span>POS<span class="brand-sub">MANAGEMENT</span></span></a>
+    <div class="nav-caption">WORKSPACE</div>
+    {% if user.role == "ADMIN" %}
+      <a class="nav-link" href="{% url 'backoffice' %}">▦ <span>Dashboard</span></a>
+      <div class="nav-caption">FILE</div>
+      <a class="nav-link" href="{% url 'master' 'products' %}">▣ <span>Products</span></a>
+      <div class="nav-caption">TRANSACTIONS</div>
+      <a class="nav-link" href="{% url 'purchases' %}">⇩ <span>Delivery / Purchase</span></a>
+      <a class="nav-link" href="{% url 'bad_orders' %}">⚠ <span>Bad Order</span></a>
+      <div class="nav-caption">MAINTENANCE</div>
+      <a class="nav-link" href="{% url 'master' 'payments' %}">▤ <span>Card / Cheque</span></a>
+      <a class="nav-link" href="{% url 'master' 'branches' %}">⌖ <span>Branch</span></a>
+      <a class="nav-link" href="{% url 'master' 'suppliers' %}">♧ <span>Supplier</span></a>
+      <a class="nav-link" href="{% url 'master' 'units' %}">◫ <span>Unit of Measure</span></a>
+      <a class="nav-link" href="{% url 'master' 'departments' %}">▦ <span>Department</span></a>
+      <a class="nav-link" href="{% url 'master' 'users' %}">♙ <span>User</span></a>
+      <a class="nav-link" href="{% url 'stock' %}">▥ <span>Stock</span></a>
+      <a class="nav-link" href="{% url 'master' 'company' %}">ⓘ <span>About Us</span></a>
+      <div class="nav-caption">REPORTS</div>
+      <a class="nav-link" href="{% url 'report' 'inventory' %}">▥ <span>Inventory</span></a>
+      <a class="nav-link" href="{% url 'report' 'sales' %}">↗ <span>Sales</span></a>
+      <a class="nav-link" href="{% url 'report' 'payables' %}">＄ <span>Payable</span></a>
+      <a class="nav-link" href="{% url 'report' 'history' %}">◷ <span>History</span></a>
+      <a class="nav-link" href="{% url 'report' 'zreadings' %}">▤ <span>Z Reading</span></a>
+    {% else %}
+      <a class="nav-link" href="{% url 'cashier' %}">▦ <span>Cashiering</span></a>
+      <a class="nav-link" href="{% url 'cashier_zreading' %}">▤ <span>Z Reading</span></a>
+    {% endif %}
+    <div class="sidebar-bottom"><div class="user-chip"><span class="avatar">{{ user.display_name|first|upper }}</span><span><b>{{ user.display_name }}</b><small>{{ user.get_role_display }}{% if user.branch %} · {{ user.branch.name }}{% endif %}</small></span></div><a class="nav-link signout" href="{% url 'logout' %}">↪ <span>Sign out</span></a></div>
+  </aside>
+  <main class="main">
+    <header class="topbar"><div><span class="eyebrow">{% if user.role == "ADMIN" %}BACK OFFICE{% else %}CASHIERING{% endif %}</span><h1>{% block page_heading %}Dashboard{% endblock %}</h1></div><div class="top-user"><span class="status-dot"></span>{{ user.display_name }}<span class="avatar small">{{ user.display_name|first|upper }}</span></div></header>
+    <section class="content">
+      {% for message in messages %}<div class="alert {{ message.tags }}">{{ message }}</div>{% endfor %}
+      {% block content %}{% endblock %}
+    </section>
+  </main>
+</div>
+{% else %}
+  {% for message in messages %}<div class="alert {{ message.tags }} login-alert">{{ message }}</div>{% endfor %}
+  {% block anonymous_content %}{% endblock %}
+{% endif %}
+<dialog class="confirm-dialog" id="confirm-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-message">
+  <div class="confirm-icon" aria-hidden="true"><span>!</span></div>
+  <h2 id="confirm-title">Please confirm</h2>
+  <p id="confirm-message">Are you sure you want to continue?</p>
+  <div class="confirm-actions">
+    <button class="button secondary" type="button" data-confirm-cancel>Cancel</button>
+    <button class="button primary" type="button" data-confirm-accept>Confirm</button>
+  </div>
+</dialog>
+<script src="{% static 'pos/app.js' %}" defer></script>
+</body>
+</html>

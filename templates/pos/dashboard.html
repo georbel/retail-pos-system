@@ -1,0 +1,24 @@
+{% extends "pos/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_heading %}Overview{% endblock %}
+{% block content %}
+<div class="page-intro"><div><p class="muted">A live snapshot of your business performance.</p></div><form method="get" class="inline-form"><label class="muted">Branch</label><select name="branch" class="input compact" onchange="this.form.submit()"><option value="">All branches</option>{% for branch in branches %}<option value="{{ branch.id }}" {% if request.GET.branch == branch.id|stringformat:'s' %}selected{% endif %}>{{ branch.name }}</option>{% endfor %}</select></form></div>
+<div class="stats-grid">
+  <article class="stat-card"><span class="stat-icon purple">₱</span><span class="stat-label">TODAY'S SALES</span><strong>₱{{ today_sales|floatformat:2 }}</strong><small>Completed transactions</small></article>
+  <article class="stat-card"><span class="stat-icon blue">↗</span><span class="stat-label">MONTHLY SALES</span><strong>₱{{ monthly_sales|floatformat:2 }}</strong><small>Month to date</small></article>
+  <article class="stat-card"><span class="stat-icon green">▣</span><span class="stat-label">ACTIVE PRODUCTS</span><strong>{{ products_count }}</strong><small>Product catalog</small></article>
+  <article class="stat-card"><span class="stat-icon orange">!</span><span class="stat-label">LOW / OUT OF STOCK</span><strong>{{ low_stock_count }}</strong><small>Needs attention</small></article>
+  <article class="stat-card"><span class="stat-icon cyan">♧</span><span class="stat-label">SUPPLIERS</span><strong>{{ suppliers_count }}</strong><small>Active partners</small></article>
+  <article class="stat-card"><span class="stat-icon pink">▤</span><span class="stat-label">TRANSACTIONS TODAY</span><strong>{{ transactions_count }}</strong><small>Selected branch</small></article>
+  <article class="stat-card"><span class="stat-icon teal">♙</span><span class="stat-label">ACTIVE CASHIERS</span><strong>{{ cashiers_count }}</strong><small>Registered users</small></article>
+</div>
+<div class="panel-grid">
+  <section class="panel"><div class="panel-heading"><div><h2>Daily sales</h2><p>Last seven days</p></div><a class="text-link" href="{% url 'report' 'sales' %}">View report →</a></div>
+    <div class="chart-bars">{% for row in daily %}<div class="chart-col"><div class="bar" style="height:{{ row.height }}px" title="₱{{ row.total|floatformat:2 }}"></div><small>{{ row.created_at__date|date:"D" }}</small></div>{% empty %}<p class="empty-state">Sales activity will appear here.</p>{% endfor %}</div>
+  </section>
+  <section class="panel"><div class="panel-heading"><div><h2>Monthly sales</h2><p>Month by month this year</p></div></div><div class="chart-bars">{% for row in monthly %}<div class="chart-col"><div class="bar" style="height:{{ row.height }}px" title="₱{{ row.total|floatformat:2 }}"></div><small>{{ row.month|date:"M" }}</small></div>{% empty %}<p class="empty-state">Sales activity will appear here.</p>{% endfor %}</div></section>
+  <section class="panel"><div class="panel-heading"><div><h2>Payment methods</h2><p>Today's sales mix</p></div></div>{% for row in payment_summary %}<div class="summary-row"><span>{{ row.payment_method__name }}</span><strong>₱{{ row.total|floatformat:2 }}</strong></div>{% empty %}<p class="empty-state">No sales recorded today.</p>{% endfor %}</section>
+  <section class="panel full"><div class="panel-heading"><div><h2>Sales by cashier</h2><p>Today's performance</p></div><a class="text-link" href="{% url 'report' 'sales' %}">Full report →</a></div><div class="table-wrap"><table><thead><tr><th>Cashier</th><th class="numeric">Net sales</th></tr></thead><tbody>{% for row in by_cashier %}<tr><td>{{ row.cashier__full_name|default:row.cashier__username }}</td><td class="numeric">₱{{ row.total|floatformat:2 }}</td></tr>{% empty %}<tr><td colspan="2" class="empty-state">No sales recorded today.</td></tr>{% endfor %}</tbody></table></div></section>
+  <section class="panel full"><div class="panel-heading"><div><h2>Sales by branch</h2><p>Today's performance</p></div></div><div class="table-wrap"><table><thead><tr><th>Branch</th><th class="numeric">Net sales</th></tr></thead><tbody>{% for row in by_branch %}<tr><td>{{ row.branch__name }}</td><td class="numeric">₱{{ row.total|floatformat:2 }}</td></tr>{% empty %}<tr><td colspan="2" class="empty-state">No sales recorded today.</td></tr>{% endfor %}</tbody></table></div></section>
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "pos/base.html" %}
+{% block title %}Sign in{% endblock %}
+{% block anonymous_content %}
+<main class="login-page">
+  <section class="login-art"><div class="login-logo"><span class="brand-icon">P</span> POS SYSTEM</div><div class="login-message"><div class="eyebrow">SMARTER RETAIL OPERATIONS</div><h1>Everything you need<br>to run your store.</h1><p>Manage your inventory, serve customers, and understand your business — all in one place.</p></div><div class="login-foot">INTEGRATED POINT OF SALE · INVENTORY · REPORTING</div></section>
+  <section class="login-panel"><form method="post" class="login-form">{% csrf_token %}<div class="eyebrow">WELCOME BACK</div><h2>Sign in to your account</h2><p class="muted">Your workspace opens automatically based on your account role.</p>
+    <label for="id_username">Username</label>{{ form.username }}{{ form.username.errors }}
+    <label for="id_password">Password</label>{{ form.password }}{{ form.password.errors }}
+    <button class="button primary wide" type="submit">Sign in <span>→</span></button>
+  </form><div class="login-security">🔒 &nbsp;Secure role-based access</div></section>
+</main>
+{% endblock %}
