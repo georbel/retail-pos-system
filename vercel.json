@@ -2,12 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
     "config/wsgi.py": {
-      "includeFiles": [
-        "templates/**",
-        "db.sqlite3",
-        "pos/migrations/**",
-        "pos/templatetags/**"
-      ]
+      "includeFiles": "templates/**"
     }
   }
 }
